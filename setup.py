@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
   name = 'gitPrice',
-  version = '1.0.0',
+  version = '1.0.1',
   description = 'Uses git log to calculate the price of code from an hourly rate.',
   author = 'Tayler Porter',
   author_email = 'taylerporter@gmail.com',

@@ -1,3 +1,4 @@
+from argparse import RawTextHelpFormatter
 from datetime import datetime
 from typing import Any, Optional
 import argparse
@@ -40,6 +41,7 @@ def readCommand(cmd: str) -> str:
   data = data.replace(b'\xfe', b'')
   data = data.replace(b'\r', b'')
   data = data.decode('utf8')
+  debug(data, 8)
   data = data.split('\n')
   return data
 
@@ -76,6 +78,7 @@ def gitPrice(args) -> int:
   for line in log:
     if 'commit' in line[0:6]:
       if cCommit != {}:
+        debug(cCommit, 8)
         execute(cur, "INSERT INTO commits VALUES (?, ?, ?)", (cCommit['name'], cCommit['author'], cCommit['timestamp']))
         cCommit = {}
       data = line.split()
@@ -88,6 +91,12 @@ def gitPrice(args) -> int:
       date = (' '.join(data[1:])).strip()
       dt = datetime.strptime(date, "%a %b %d %H:%M:%S %Y %z")
       cCommit['timestamp'] = round(time.mktime(dt.timetuple()))
+
+  if cCommit != {}:
+    debug(cCommit, 8)
+    debug("LAST", 8)
+    execute(cur, "INSERT INTO commits VALUES (?, ?, ?)", (cCommit['name'], cCommit['author'], cCommit['timestamp']))
+    cCommit = {}
 
   last_timestamp = 0
   last_commit = ""
@@ -139,7 +148,7 @@ def gitPrice(args) -> int:
   return 0
 
 def main() -> int:
-  parser = argparse.ArgumentParser(description='Calculates Payable Time based off git repo.')
+  parser = argparse.ArgumentParser(description='Calculates Payable Time based off git repo.', formatter_class=RawTextHelpFormatter)
   parser.add_argument('--author', type=str, required=('--convert' not in sys.argv), help='Author being calculated.')
   parser.add_argument('--convert', type=str, help='Converts Git Date to timestamp.')
   parser.add_argument('--after', type=int, help='Will calculate the prices from after this timestamp.')
@@ -150,8 +159,9 @@ def main() -> int:
 00000010 (2) Display pay breakdown for per line commits.
 00000100 (4) Display commit hashes for breakdowns displayed.''')
   args = parser.parse_args()
+  global DEBUG_BYTE
   DEBUG_BYTE = args.v
-  gitPrice(args)
+  return gitPrice(args)
 
 if __name__ == "__main__":
   raise SystemExit(main())
