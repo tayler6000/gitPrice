@@ -151,6 +151,7 @@ def main() -> int:
 00000100 (4) Display commit hashes for breakdowns displayed.''')
   args = parser.parse_args()
   DEBUG_BYTE = args.v
+  gitPrice(args)
 
 if __name__ == "__main__":
   raise SystemExit(main())
